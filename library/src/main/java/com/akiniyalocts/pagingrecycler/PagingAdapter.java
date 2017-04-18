@@ -1,5 +1,6 @@
 package com.akiniyalocts.pagingrecycler;
 
+import android.os.Handler;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.LayoutInflater;
@@ -17,6 +18,8 @@ public abstract class PagingAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     // View tag for paging view
     public static int VIEW_TYPE_PAGING = -100;
 
+    private final Handler postHandler;
+
     // Empty ViewHolder for paging view
     static class LoadingViewHolder extends RecyclerView.ViewHolder{
         public LoadingViewHolder(View itemView) {
@@ -32,7 +35,9 @@ public abstract class PagingAdapter extends RecyclerView.Adapter<RecyclerView.Vi
      */
     private PagingDelegate pagingDelegate;
 
-    public PagingAdapter() {}
+    public PagingAdapter() {
+        postHandler = new Handler();
+    }
 
     /**
      * Provide the layout you wish to inflate when the adapter is loading
@@ -57,7 +62,14 @@ public abstract class PagingAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     public void setPaging(){
         if(!paging) {
             paging = true;
-            notifyItemInserted(getItemCount() + 1);
+
+            final Runnable r = new Runnable() {
+                public void run() {
+                    PagingAdapter.this.notifyItemInserted(getItemCount() + 1);
+                }
+            };
+
+            postHandler.post(r);
         }
     }
 
